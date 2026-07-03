@@ -1,1 +1,46 @@
+# Virtual environments
 /venv
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Database
+data/*.db
+data/*.sqlite
+
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# Model artifacts
+models/*.pkl
+models/*.joblib
+models/*.onnx
+!models/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+
+# Airflow
+airflow.cfg
+airflow.db
+webserver_config.py
+
+# Docker volumes (local state)
+postgres_data/
+airflow_postgres_data/
