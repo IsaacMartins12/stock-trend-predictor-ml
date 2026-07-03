@@ -278,8 +278,8 @@ make api               # Start FastAPI serving
 - [x] Prediction generation & persistence
 - [x] Model monitoring & drift detection
 - [x] FastAPI model serving
+- [x] Grafana dashboard for monitoring
 - [ ] CI/CD pipeline (GitHub Actions)
-- [ ] Grafana dashboard for monitoring
 - [ ] Additional models (XGBoost, LSTM)
 - [ ] Multi-asset portfolio optimization
 
