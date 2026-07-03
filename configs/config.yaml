@@ -1,0 +1,60 @@
+# ============================================
+# Stock Trend Predictor - Configuration
+# ============================================
+
+data:
+  tickers:
+    - PETR4.SA
+    - VALE3.SA
+    - ITUB4.SA
+  start_date: "2015-01-01"
+  end_date: null  # null = today
+  interval: "1d"
+
+database:
+  host: "localhost"
+  port: 5432
+  dbname: "stock_predictor"
+  user: "stock_user"
+  password: "stock_pass"
+
+features:
+  lag_periods: [1, 2, 3, 5, 10, 21]
+  rolling_windows: [5, 10, 21, 63]
+  technical_indicators:
+    - rsi
+    - macd
+    - bollinger_bands
+    - atr
+
+model:
+  type: "lightgbm"  # options: lightgbm, xgboost, lstm
+  target: "direction"  # options: direction (classification), returns (regression)
+  forecast_horizon: 5  # days ahead
+  train_test_split:
+    method: "walk_forward"
+    n_splits: 5
+    test_size: 63  # ~3 months of trading days
+
+  hyperparameters:
+    lightgbm:
+      n_estimators: 500
+      learning_rate: 0.05
+      max_depth: 6
+      num_leaves: 31
+      min_child_samples: 20
+      subsample: 0.8
+      colsample_bytree: 0.8
+
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - directional_accuracy
+    - sharpe_ratio
+
+serving:
+  host: "0.0.0.0"
+  port: 8000

@@ -1,0 +1,170 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "📈 Stock Prices (Silver Layer)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT sp.date AS time, a.ticker, sp.close FROM silver.stock_prices sp JOIN assets a ON sp.asset_id = a.id ORDER BY sp.date ASC",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "currencyBRL"
+        }
+      }
+    },
+    {
+      "title": "📊 Model Accuracy by Ticker",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT ticker, metric_value as accuracy FROM model_metrics WHERE metric_name = 'accuracy' ORDER BY trained_at DESC LIMIT 3",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        }
+      }
+    },
+    {
+      "title": "🎯 Latest Predictions",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT a.ticker, p.prediction_date, p.target_date, CASE WHEN p.predicted_direction = 1 THEN '📈 UP' ELSE '📉 DOWN' END as direction, ROUND(p.confidence::numeric, 4) as confidence, p.model_version FROM gold.predictions p JOIN assets a ON p.asset_id = a.id ORDER BY p.created_at DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "📉 Volatility (21d Rolling)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT fs.date AS time, a.ticker, fs.volatility_21d FROM gold.feature_store fs JOIN assets a ON fs.asset_id = a.id WHERE fs.date > NOW() - INTERVAL '1 year' ORDER BY fs.date ASC",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "percentunit"
+        }
+      }
+    },
+    {
+      "title": "📊 RSI (14 periods)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT fs.date AS time, a.ticker, fs.rsi_14 FROM gold.feature_store fs JOIN assets a ON fs.asset_id = a.id WHERE fs.date > NOW() - INTERVAL '6 months' ORDER BY fs.date ASC",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2 },
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "green", "value": 30 },
+              { "color": "yellow", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "📦 Data Pipeline Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 24 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) as value, 'Bronze Rows' as metric FROM bronze.raw_stock_prices",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "🔄 Silver Layer",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 24 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) as value, 'Silver Rows' as metric FROM silver.stock_prices",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "⭐ Gold Features",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 24 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT COUNT(*) as value, 'Gold Feature Rows' as metric FROM gold.feature_store",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "✅ Data Quality Checks",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 28 },
+      "datasource": "PostgreSQL",
+      "targets": [
+        {
+          "rawSql": "SELECT a.ticker, dq.check_name, dq.passed, dq.check_date, dq.details::text FROM silver.data_quality_checks dq JOIN assets a ON dq.asset_id = a.id ORDER BY dq.executed_at DESC LIMIT 20",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["stock-predictor", "ml", "monitoring"],
+  "templating": { "list": [] },
+  "time": { "from": "now-6M", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Stock Trend Predictor - ML Dashboard",
+  "uid": "stock-predictor-main",
+  "version": 1
+}
